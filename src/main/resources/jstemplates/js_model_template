@@ -1,0 +1,153 @@
+$name-space.$model-name = function $model-name (){
+    var self = this;
+    var entityStatus = {
+        detached: "detached",
+        created: "created",
+        synchronized: "synchronized",
+        saved: "saved",
+        deleted: "deleted"
+    }
+    self._status = entityStatus.detached;
+
+    self.get = function(success, fail, args){
+        var url;
+        try{
+            url = generateUrl("$get-method-path", args);
+        } catch(error){
+            if(error.message == "Url isn't defined"){
+                console.error("Method Get isn't defined in Controller.");
+            } else{
+                console.error("Error during performing Get method.\n", error);
+            }
+            return;
+        };
+        $.ajax({
+            url: url,
+            type : "GET",
+            contentType :"application/json",
+            success : function(response){
+                copyResponceToInstance(response);
+                self._status = entityStatus.synchronized;
+                success && success(self, response);
+            },
+            error: function(e){
+                fail && fail(e);
+            }
+        });
+    };
+    Object.defineProperty(self, "get", {enumerable: false});
+
+    self.save = function(success, fail, args){
+        var url;
+        try{
+            url = generateUrl("$save-method-path", args);
+        } catch(error){
+            if(error.message == "Url isn't defined"){
+                console.error("Method Save isn't defined in Controller.");
+            } else{
+                console.error("Error during performing Save method.\n", error);
+            }
+            return;
+        };
+        $.ajax({
+            url: url,
+            type : "PUT",
+            contentType :"application/json",
+            data: JSON.stringify(self),
+            success : function(response){
+                copyResponceToInstance(response);
+                self._status = entityStatus.saved;
+                success && success(self, response);
+            },
+            error: function(e){
+                fail && fail(e);
+            }
+        });
+    };
+    Object.defineProperty(self, "save", {enumerable: false});
+
+    self.create = function(success, fail, args){
+        var url;
+        try{
+            url = generateUrl("$create-method-path", args);
+        } catch(error){
+            if(error.message == "Url isn't defined"){
+                console.error("Method Create isn't defined in Controller.");
+            } else{
+                console.error("Error during performing Create method.\n", error);
+            }
+            return;
+        };
+        $.ajax({
+            url: url,
+            type : "POST",
+            contentType :"application/json",
+            data: JSON.stringify(self),
+            success : function(response){
+                copyResponceToInstance(response);
+                self._status = entityStatus.created;
+                success(self, response);
+            },
+            error: function(e){
+                fail && fail(e);
+            }
+        });
+    };
+    Object.defineProperty(self, "create", {enumerable: false});
+
+    self.delete = function(success, fail, args){
+        var url;
+        try{
+            url = generateUrl("$delete-method-path", args);
+        } catch(error){
+            if(error.message == "Url isn't defined"){
+                console.error("Method Delete isn't defined in Controller.");
+            } else{
+                console.error("Error during performing Delete method.\n", error);
+            }
+            return;
+        }
+        $.ajax({
+            url: url,
+            type : "DELETE",
+            contentType :"application/json",
+            data: JSON.stringify(self),
+            success : function(response){
+                self._status = entityStatus.deleted;
+                success(self, response);
+            },
+            error: function(e){
+                fail(e);
+            }
+        });
+    };
+    Object.defineProperty(self, "delete", {enumerable: false});
+
+    function generateUrl(url, args){
+        if(!url || 0 === url.length){
+            throw new Error("Url isn't defined");
+        };
+        if(args !== null){
+            for(arg in args){
+                url = url + arg + "=" + args[arg] + "&"
+            };
+        };
+        var urlParseResult = url.match(/\{[a-zA-Z0-9]*\}/g) || {};
+        for(var i=0;i<urlParseResult.length;i++){
+            var pattern = urlParseResult[i];
+            var prop = pattern.slice(1, pattern.length - 1);
+            if(self[prop] == undefined){
+                throw Error("The model should contain property:" + prop + " which defined in url path.");
+            };
+            url = url.replace(pattern, self[prop]);
+        };
+
+        return url;
+    };
+
+    function copyResponceToInstance(response){
+        for(prop in response){
+            self[prop] = response[prop];
+        };
+    };
+};
