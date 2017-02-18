@@ -7,7 +7,10 @@ import com.restapijs.model.JsModel;
 import com.restapijs.model.JsModelConfig;
 import com.restapijs.scaner.ClassScanner;
 import com.restapijs.scaner.SBootClassScannerImpl;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
@@ -31,13 +34,22 @@ public class RestApiJsConfiguration implements ApplicationListener<ApplicationRe
     private final String JS_NAMESPACE_ENV_PROP = "restapijs.js.namespace";
     private final String DEFAULT_JS_OUTPUT_BASE_PATH = "src/main/resources/static/js/models/";
     private final String DEFAULT_JS_NAMESPACE = "RestApiJs";
+    private final String JS_DISABLE_STATUS_ENV_PROP = "restjs.disable";
+
+    private Logger log = LoggerFactory.getLogger(RestApiJsConfiguration.class);
 
     @Autowired
     private Environment env;
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
+        Boolean disable = Boolean.parseBoolean(env.getProperty(JS_DISABLE_STATUS_ENV_PROP, "false"));
+        if(disable){
+            log.info("Generating js models disabled. To start generate models switch application property restjs.disable to false.");
+            return;
+        }
         try {
+            log.info("Start scanning classes for searching js models annotations ...");
             ClassScanner classScanner = new SBootClassScannerImpl();
             Map<String, List<JsModel>> jsModelMap = classScanner.scanForModels();
             Map<String, JsModelConfig> jsModelConfigMap = classScanner.scanForModelsConfig();
@@ -55,11 +67,11 @@ public class RestApiJsConfiguration implements ApplicationListener<ApplicationRe
                         .writeFile()
                         .createNewFile();
             }
+            log.info("Finished generating js models.");
         } catch (ClassScannerException e) {
-            e.printStackTrace();
+            log.error("Error during scanning classes.", e);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Error during generating js models.", e);
         }
-
     }
 }

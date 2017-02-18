@@ -37,6 +37,7 @@ public class DefaultJsWriter implements JsWriter {
 
     @Override
     public JsWriter addNameSpace(String nameSpace) throws IOException {
+        log.debug("Adding namespace:{} into js file.", nameSpace);
         this.nameSpace = nameSpace;
         String[] nameSpaceArray = nameSpace.split("\\.");
         List<String> lines = new ArrayList<String>();
@@ -65,6 +66,7 @@ public class DefaultJsWriter implements JsWriter {
             line = line.replace("$delete-method-path", findMethodPath(jsModelList, JsModel.RestRequestMethod.DELETE));
             addLine(line);
         }
+        log.info("Completed generating {} js model.", modelName);
 
         return this;
     }
@@ -79,6 +81,7 @@ public class DefaultJsWriter implements JsWriter {
     private String findMethodPath(List<JsModel> jsModelList, JsModel.RestRequestMethod method){
         for (JsModel jsModel:jsModelList){
             if (jsModel.getMethod().equals(method)){
+                log.debug("The method:{} was found for model:{}.", method.toString(), jsModel.getName());
                 return jsModel.getPath();
             }
         }
@@ -87,6 +90,7 @@ public class DefaultJsWriter implements JsWriter {
     }
 
     private void addLine(String line){
+        log.trace("Add line:{}", line);
         this.lines.add(line);
     }
 }

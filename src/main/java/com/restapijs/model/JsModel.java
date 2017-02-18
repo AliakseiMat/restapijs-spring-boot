@@ -53,4 +53,14 @@ public class JsModel {
         OPTIONS,
         TRACE;
     }
+
+    @Override
+    public String toString(){
+        StringBuffer sb = new StringBuffer();
+        sb.append("{name:" + this.name + ",");
+        sb.append("path:" + this.path + ",");
+        sb.append("method:" + this.method.toString() + "}");
+
+        return sb.toString();
+    }
 }

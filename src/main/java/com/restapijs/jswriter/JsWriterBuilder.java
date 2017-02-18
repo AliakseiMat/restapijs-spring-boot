@@ -2,6 +2,8 @@ package com.restapijs.jswriter;
 
 import com.restapijs.jswriter.impl.DefaultJsWriter;
 import com.restapijs.model.JsModelConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,6 +16,8 @@ import java.nio.file.Paths;
 public class JsWriterBuilder {
 
     private JsWriter defaultWriter;
+
+    private Logger log = LoggerFactory.getLogger(JsWriterBuilder.class);
 
     public static Builder createBuilder(String path, JsModelConfig config) {
         return new JsWriterBuilder().new Builder(path, config);
@@ -39,6 +43,7 @@ public class JsWriterBuilder {
             Files.createDirectories(jsFilePath);
             Path jsFile = Paths.get(path + this.config.getFileName());
             defaultWriter = new DefaultJsWriter(jsFile);
+            log.debug("DefaultJsWriter was created with path:{} config:{}", this.path, this.config.toString());
 
             return JsWriterBuilder.this;
         }

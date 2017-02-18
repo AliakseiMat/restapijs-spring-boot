@@ -44,4 +44,14 @@ public class JsModelConfig {
         this.fileName = fileName;
         this.path = path;
     }
+
+    @Override
+    public String toString(){
+        StringBuffer sb = new StringBuffer();
+        sb.append("{name:" + this.name + ",");
+        sb.append("fileName:" + this.fileName + ",");
+        sb.append("path:" + this.path + "}");
+
+        return sb.toString();
+    }
 }
