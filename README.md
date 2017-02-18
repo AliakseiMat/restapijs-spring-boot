@@ -107,5 +107,7 @@ restjs.disable=false
 ```
 
 restjs.js.path - the basic path where generated js file will be placed
+
 restapijs.js.namespace - javascript namespace for js model
+
 restjs.disable - disable generating js models 
